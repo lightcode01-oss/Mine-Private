@@ -190,7 +190,7 @@ window.addEventListener('load', startTimer);
 
   // Unlock flags
   let hintUnlocked = false;
-  let autoSolveUnlocked = true;
+  let autoSolveUnlocked = false;
 
   const puzzleGrid = document.getElementById('puzzleGrid');
   const nextButton = document.getElementById('nextButton');
@@ -311,7 +311,7 @@ window.addEventListener('load', startTimer);
     document.getElementById('autoSolveModal').style.display = 'none';
   }
   function unlockAutoSolve() {
-    autoSolveUnlocked = true;
+    autoSolveUnlocked = false;
     closeAutoSolveModal();
     alert('Auto Solve unlocked! Click "Auto Solve" again to solve the puzzle.');
   }
