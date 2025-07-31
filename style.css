@@ -1608,3 +1608,32 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-color);
 }
+
+.audio-player-container {
+  margin: 30px auto;
+  max-width: 500px;
+  padding: 20px;
+  background: rgba(255, 23, 68, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 23, 68, 0.3);
+  box-shadow: 0 8px 20px rgba(255, 23, 68, 0.2);
+  text-align: center;
+  color: #ff1744;
+  font-family: 'Dancing Script', cursive;
+}
+
+.audio-title {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(255, 23, 68, 0.5);
+}
+
+.audio-caption {
+  font-size: 1rem;
+  margin-top: 12px;
+  font-style: italic;
+  color: #ff4081;
+  opacity: 0.85;
+}
