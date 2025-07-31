@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Unlock Puzzle - Our Magical Love Story</title>
+<style>
+  body {
+    font-family: 'Georgia', serif;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+  }
+  h2 {
+    color: #8B0000;
+    margin-bottom: 15px;
+  }
+  .puzzle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 2px;
+    background: #333;
+    padding: 10px;
+    border-radius: 10px;
+    user-select: none;
+  }
+  .puzzle-piece {
+    width: 100px;
+    height: 100px;
+    background-size: 300px 300px;
+    background-image: url('your-image-path.jpg'); /* <-- Replace with your image path or base64 */
+    cursor: pointer;
+    border-radius: 5px;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+  }
+  .puzzle-piece.empty {
+    background: #f0f0f0;
+    cursor: default;
+  }
+  .puzzle-piece:hover:not(.empty) {
+    transform: scale(1.05);
+  }
+  #nextButton {
+    margin-top: 20px;
+    padding: 10px 25px;
+    font-size: 1.2rem;
+    background-color: #8B0000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: none;
+  }
+  #nextButton:hover {
+    background-color: #a00000;
+  }
+  .controls {
+    margin: 15px 0;
+  }
+  button.control-btn {
+    margin: 0 10px;
+    padding: 8px 18px;
+    font-size: 1rem;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    background-color: #ff6b6b;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  button.control-btn:hover {
+    background-color: #ff4b4b;
+  }
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 25px 40px;
+    max-width: 320px;
+    text-align: center;
+  }
+  .modal-content h3 {
+    margin-bottom: 12px;
+    color: #8B0000;
+  }
+  .modal-content button {
+    margin: 10px 8px 0 8px;
+    padding: 8px 18px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    background-color: #ff6b6b;
+    color: white;
+  }
+  .modal-content button.cancel-btn {
+    background-color: #ccc;
+    color: #444;
+  }
+  .modal-content button.cancel-btn:hover {
+    background-color: #bbb;
+  }
+</style>
+</head>
+<body>
+
+<h2>💝 Unlock Our Memories 💝</h2>
+<p>Madam ji phale isko slove karo phir andar jao❤️😂</p>
+
+<div class="puzzle-grid" id="puzzleGrid"></div>
+
+<div class="controls">
+  <button class="control-btn" onclick="attemptHint()">Hint</button>
+  <button class="control-btn" onclick="attemptAutoSolve()">Auto Solve</button>
+</div>
+<div class="timer">Time: <span id="timer">240</span>s</div>
+
+<button id="nextButton" onclick="goNext()">Next</button>
+
+<!-- Hint Popup -->
+<div id="hintModal" class="modal">
+  <div class="modal-content">
+    <h3>Unlock the Hint 🔐</h3>
+    <p>To get a hint, you must send a <strong style="color:#e63946;">sexy sexual photo</strong> to my WhatsApp!<br>After you've done that, click below.</p>
+    <button onclick="unlockHint()">I've sent the photo!</button>
+    <button class="cancel-btn" onclick="closeHintModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- Auto Solve Popup -->
+<div id="autoSolveModal" class="modal">
+  <div class="modal-content">
+    <h3>Unlock Auto Solve 🔓</h3>
+    <p>For auto-solve, you must <strong style="color:#e63946;">video call me</strong> and show your sexy body with sexy poses !<br>Afterwards, click below.</p>
+    <button onclick="unlockAutoSolve()">I did the video call!</button>
+    <button class="cancel-btn" onclick="closeAutoSolveModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  let timeLeft = 240;
+let gameActive = true;
+
+function startTimer() {
+    const timer = setInterval(() => {
+        if (!gameActive) {
+            clearInterval(timer);
+            return;
+        }
+        timeLeft--;
+        document.getElementById('timer').textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("Time's up!");
+            gameActive = false;
+        }
+    }, 1000);
+}
+
+window.addEventListener('load', startTimer);
+
+  // You must replace this with your actual image URL or base64 data for puzzle background
+  const puzzleImage = 'lock1.jpg'; // <-- Put your puzzle image here
+
+  let puzzlePieces = [];
+  let emptyIndex = 8;
+  let moveCount = 0;
+  let startTime = null;
+  let timerInterval = null;
+
+  // Unlock flags
+  let hintUnlocked = false;
+  let autoSolveUnlocked = false;
+
+  const puzzleGrid = document.getElementById('puzzleGrid');
+  const nextButton = document.getElementById('nextButton');
+
+  // Initialize puzzle pieces order (0 to 8)
+  function initializePuzzle() {
+    puzzlePieces = [0,1,2,3,4,5,6,7,8];
+    emptyIndex = 8;
+    moveCount = 0;
+    startTime = null;
+    shufflePuzzle(5); // easy shuffle = 8 moves
+    renderPuzzle();
+    nextButton.style.display = 'none';
+  }
+
+  // Shuffle puzzle with n random valid moves
+  function shufflePuzzle(times) {
+    for (let i = 0; i < 2000; i++) {
+      const validMoves = getValidMoves();
+      const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+      swapPieces(emptyIndex, randomMove);
+      emptyIndex = randomMove;
+    }
+  }
+
+  // Get valid move indices around empty tile
+  function getValidMoves() {
+    const moves = [];
+    const row = Math.floor(emptyIndex / 3);
+    const col = emptyIndex % 3;
+
+    if (row > 0) moves.push(emptyIndex - 3); // Up
+    if (row < 2) moves.push(emptyIndex + 3); // Down
+    if (col > 0) moves.push(emptyIndex - 1); // Left
+    if (col < 2) moves.push(emptyIndex + 1); // Right
+    
+    return moves;
+  }
+
+  // Swap two tile indices in puzzlePieces
+  function swapPieces(i1, i2) {
+    [puzzlePieces[i1], puzzlePieces[i2]] = [puzzlePieces[i2], puzzlePieces[i1]];
+  }
+
+  // Render puzzle grid
+  function renderPuzzle() {
+    puzzleGrid.innerHTML = '';
+    puzzlePieces.forEach((piece, index) => {
+      const div = document.createElement('div');
+      div.className = 'puzzle-piece';
+      
+      if (piece === 8) {
+        div.classList.add('empty');
+      } else {
+        const row = Math.floor(piece / 3);
+        const col = piece % 3;
+        div.style.backgroundImage = `url(${puzzleImage})`;
+        div.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
+      }
+      div.addEventListener('click', () => movePiece(index));
+      puzzleGrid.appendChild(div);
+    });
+  }
+
+  // Move tile if it is adjacent to empty
+  function movePiece(clickedIndex) {
+    if (!startTime) startTime = Date.now();
+
+    const validMoves = getValidMoves();
+    if (validMoves.includes(clickedIndex)) {
+      swapPieces(emptyIndex, clickedIndex);
+      emptyIndex = clickedIndex;
+      moveCount++;
+      renderPuzzle();
+      
+      if (checkWin()) {
+        alert('🎉 Congratulations! You unlocked our memories! 🎉');
+        nextButton.style.display = 'inline-block';
+      }
+    }
+  }
+
+  // Check if puzzle is solved
+  function checkWin() {
+    for (let i=0; i < 8; i++) {
+      if (puzzlePieces[i] !== i) return false;
+    }
+    return true;
+  }
+
+  // Next button click handler
+  function goNext() {
+    if (checkWin()) {
+      window.location.href = 'abhi.html'; // redirect to your next page
+    } else {
+      alert('Please complete the puzzle before proceeding.');
+    }
+  }
+
+  // Modal logic for Hint:
+  function showHintModal() {
+    document.getElementById('hintModal').style.display = 'flex';
+  }
+  function closeHintModal() {
+    document.getElementById('hintModal').style.display = 'none';
+  }
+  function unlockHint() {
+    hintUnlocked = false;
+    closeHintModal();
+    alert('Hint unlocked! Click "Hint" again to get a tip.');
+  }
+
+  // Modal logic for Auto Solve:
+  function showAutoSolveModal() {
+    document.getElementById('autoSolveModal').style.display = 'flex';
+  }
+  function closeAutoSolveModal() {
+    document.getElementById('autoSolveModal').style.display = 'none';
+  }
+  function unlockAutoSolve() {
+    autoSolveUnlocked = false;
+    closeAutoSolveModal();
+    alert('Auto Solve unlocked! Click "Auto Solve" again to solve the puzzle.');
+  }
+
+  // Button handlers for Hint & Auto Solve
+  function attemptHint() {
+    if (!hintUnlocked) {
+      showHintModal();
+    } else {
+      showHint();
+    }
+  }
+
+  function attemptAutoSolve() {
+    if (!autoSolveUnlocked) {
+      showAutoSolveModal();
+    } else {
+      autoSolvePuzzle();
+    }
+  }
+
+  // The actual hint logic (you can improve it as you like)
+  function showHint() {
+    if (!hintUnlocked) {
+      alert("You need to unlock the hint first!");
+      return;
+    }
+    // Hint: Suggest a valid move (show the next piece that should move for easier solving)
+    const adj = getValidMoves();
+    for(let i=0; i<adj.length; i++) {
+      // We want to suggest a move that approaches solving
+      // E.g. find if swapping this tile puts puzzle closer to solved
+      const simulated = puzzlePieces.slice();
+      [simulated[emptyIndex], simulated[adj[i]]] = [simulated[adj[i]], simulated[emptyIndex]];
+
+      if(isCloserToGoal(puzzlePieces, simulated)) {
+        alert("Hint: Try moving the tile that is near the empty space!");
+        return;
+      }
+    }
+    alert("Hint: Try moving tiles adjacent to the empty space.");
+  }
+
+  // Utility: Check if a configuration is closer to solved than original
+  function isCloserToGoal(original, test) {
+    function correctPositions(arr) {
+      let score = 0;
+      for (let i=0; i<8; i++) if(arr[i]===i) score++;
+      return score;
+    }
+    return correctPositions(test) > correctPositions(original);
+  }
+
+  // Auto solve the puzzle instantly
+  function autoSolvePuzzle() {
+    if(!autoSolveUnlocked) {
+      alert("You need to unlock auto solve first!");
+      return;
+    }
+    puzzlePieces = [0,1,2,3,4,5,6,7,8];
+    emptyIndex = 8;
+    renderPuzzle();
+    alert("Puzzle has been auto solved! You can now click Next.");
+    nextButton.style.display = 'inline-block';
+  }
+
+  // Initialize and start the game
+  initializePuzzle();
+</script>
+</body>
+</html>
